@@ -9,8 +9,9 @@ function load_cloud_stat_index(){
 		if(!result) return;
 		var str = '';
 		str += '<p>截止今天, 贴吧签到助手共完成 <span>'+result.ctieba+'</span> 次签到</p>';
-		str += '<p>为贴吧用户获取 <span>'+result.cexp+'</span> 点经验.</p>';
-		str += '<p>其中, 当前网站签到 <span>'+result.tieba+'</span> 次, 获取了 <span>'+result.exp+'</span> 点经验.</p>';
+		str += '<p>为贴吧用户获取 <span>'+result.cexp+'</span> 点经验.</p><hr/>';
+		str += '<p>其中, 当前站点签到 <span>'+result.tieba+'</span> 次</p>';
+		str += '<p>获取了 <span>'+result.exp+'</span> 点经验.</p>';
 		$('.kk_cloud_stat').html(str);
 	}).fail(function() { createWindow().setTitle('系统错误').setContent('发生未知错误: 获取统计信息失败').addButton('确定', function(){ location.reload(); }).append(); }).always(function(){ hideloading(); });
 }
