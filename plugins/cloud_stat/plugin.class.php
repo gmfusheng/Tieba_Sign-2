@@ -4,9 +4,9 @@ class plugin_cloud_stat extends Plugin{
 	var $description = '云统计，记录建站以来的签到次数以及获得经验数';
 	var $modules = array(
 		array('type' => 'page', 'id' => 'index', 'title' => '签到云统计', 'file' => 'index.inc.php'),
-		array('type' => 'cron', 'cron' => array('id' => 'cloud_stat/cloud_stat', 'order' => '105')),
+		array('type' => 'cron', 'cron' => array('id' => 'cloud_stat/cloud_stat', 'order' => '40')),
 	);
-	var $version = '1.1';
+	var $version = '1.2';
 	function checkCompatibility(){
 		if(version_compare(VERSION, '1.14.4.24', '<')) showmessage('本插件不兼容此版的贴吧签到助手.');
 	}
@@ -15,7 +15,7 @@ class plugin_cloud_stat extends Plugin{
 		$this->saveSetting('tieba', $count);
 		$count = DB::result_first('SELECT SUM(exp) FROM sign_log WHERE status=2');
 		$this->saveSetting('exp', $count);
-		$ret = kk_fetch_url("http://api.ikk.me/stat.php");
+		$ret = kk_fetch_url("http://api.kk.hydd.cc/stat.php");
 		if(!$ret) return;
 		$data = json_decode($ret);
 		if(!$data) return;
@@ -30,8 +30,10 @@ class plugin_cloud_stat extends Plugin{
 			case '1.0':
 				DB::query("UPDATE cron SET id='cloud_stat/cloud_stat' WHERE id='cloud_stat'");
 				return '1.1';
+			case '1.1':
+				return '1.2';
 			default:
-				throw new Exception("Unknown plugin version: {$from_version}");
+				throw new Exception("未知插件版本: {$from_version}");
 		}
 	}
 	function handleAction(){
