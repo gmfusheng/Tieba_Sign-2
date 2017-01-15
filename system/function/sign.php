@@ -1,6 +1,41 @@
 <?php
 if(!defined('IN_KKFRAME')) exit();
 
+function readCookies($str) {
+	preg_match("/set\-cookie:([^\r\n]*)/i", $str, $m1);
+		if (!empty($m1)) {
+			preg_match_all("/(.*?)=(.*?);/", $m1[1], $m2, PREG_SET_ORDER);
+			$r = array();
+			foreach ($m2 as $value) {
+				$r1 = trim($value[1]);
+				if ($r1 != 'expires' && $r1 != 'max-age' && $r1 != 'path' && $r1 != 'domain') {
+				$r = $r1 . '=' . trim($value[2]) . '; ';
+			}
+		}
+		return $r;
+	}
+}
+
+function _get_redirect_data($url,$cookie) {
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_HEADER, true);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+	$data = curl_exec($ch);
+	$info = curl_getinfo($ch);
+	curl_close($ch);
+	if ($info['http_code'] == 200) {
+		$body = substr($data, $info['header_size']);
+		return $body;
+	} elseif ($info['http_code'] == 302) {
+		$header = substr($data, 0, $info['header_size']);
+		$cookie .= readCookies($header);
+		$url =  $info['redirect_url'];
+		return _get_redirect_data($url,$cookie);
+	}
+}
+
 function _get_tbs($uid){
 	static $tbs = array();
 	if($tbs[$uid]) return $tbs[$uid];
@@ -29,38 +64,33 @@ function _verify_cookie($cookie){
 
 function _get_baidu_userinfo($uid){
 	$cookie = get_cookie($uid);
-	if(!$cookie) return array('no' => 4);
-	$tbs_url = 'http://tieba.baidu.com/f/user/json_userinfo';
-	$ch = curl_init($tbs_url);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Referer: http://tieba.baidu.com/'));
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_COOKIE, $cookie);
-	$tbs_json = curl_exec($ch);
-	curl_close($ch);
-	$tbs_json = mb_convert_encoding($tbs_json, "utf8", "gbk");
-	return json_decode($tbs_json, true);
+	if (stripos($cookie,'PTOKEN') === FALSE) return array('no' => 4);
+	$data = _get_redirect_data('http://tieba.baidu.com/f/user/json_userinfo',$cookie);
+	$json = mb_convert_encoding($data, "utf8", "gbk");
+	return json_decode($json, true);
 }
 
 function _get_liked_tieba($cookie){
+	if (stripos($cookie,'PTOKEN') === FALSE) showmessage('缺少 PTOKEN 无法获取账号信息，请通过 API 重新绑定！', './#guide');
 	$pn = 0;
 	$kw_name = array();
 	$retry = 0;
 	while (true){
 		$pn++;
-		$mylikeurl = "http://tieba.baidu.com/f/like/mylike?&pn=$pn";
-		$result = kk_fetch_url($mylikeurl, 0, '', $cookie);
+		$mylikeurl = "http://tieba.baidu.com/f/like/mylike?&pn={$pn}";
+		$result = _get_redirect_data($mylikeurl,$cookie);
 		$result = wrap_text($result);
-		$pre_reg = '/<tr><td>.*?<ahref="\/f\?kw=.*?"title="(.*?)"/';
+		$pre_reg = '/<tr><td>.*?<ahref="\/f\?kw=.*?"title="(.*?)"/i';
 		preg_match_all($pre_reg, $result, $matches);
+		preg_match_all('/balvid="([0-9]+)"/i', $result, $fid);
 		$count = 0;
 		foreach ($matches[1] as $key => $value) {
 			$uname = urlencode($value);
 			$_uname = preg_quote($value);
-			preg_match('/balvid="([0-9]+)"/i', $result, $fid);
 			$kw_name[] = array(
 				'name' => mb_convert_encoding($value, 'utf-8', 'gbk'),
 				'uname' => $uname,
-				'fid' => $fid[1],
+				'fid' => $fid[1][$count]
 			);
 			$count++;
 		}
