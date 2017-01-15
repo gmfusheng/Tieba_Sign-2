@@ -19,11 +19,11 @@ if($_GET['action'] == 'baidu_login'){
 	$_cookie = $_POST['cookie'] ? $_POST['cookie'] : $_GET['cookie'];
 	if(!$_cookie) throw new Exception('Empty response!');
 	if($_GET['formhash'] != $formhash) throw new Exception('Illegal request!');
-    if ($_GET['local']) {
-        $cookie = $_cookie;
-    } else {
-        $cookie = authcode(pack('H*', $_cookie), 'DECODE', cloud::key());
-    }
+    	if ($_GET['local']) {
+        	$cookie = $_cookie;
+    	} else {
+		$cookie = authcode(pack('H*', $_cookie), 'DECODE', cloud::key());
+    	}
 	if(!$cookie) showmessage('非法调用！', './#baidu_bind', 1);
     if (!verify_cookie($cookie)) showmessage('无法登陆百度贴吧，请尝试重新绑定' . ($_GET['local'] ? '' : '<form action="api.php?action=receive_cookie&formhash=' . $formhash . '" method="post"><input type="hidden" name="cookie" value="' . $_cookie . '"></from><script type="text/javascript">setTimeout(function(){ document.forms[0].submit(); }, 2000);</script>'));
 	save_cookie($uid, $cookie);
