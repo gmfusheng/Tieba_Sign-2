@@ -108,17 +108,24 @@ EOF;
 }
 
 function get_random_tid($tieba){
-	$ch = curl_init ('http://tieba.baidu.com/f?kw='.urlencode(iconv('utf-8', 'gbk', $tieba)).'&fr=index');
+	$ch = curl_init ('http://tieba.baidu.com/f?kw='.urlencode(iconv('utf-8', 'utf-8', $tieba)).'&fr=index');
 	curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
 	$contents = curl_exec ( $ch );
 	curl_close ( $ch );
-	preg_match_all('/<li class="j_thread_list[A-z0-9 -_]+" +data-field=\'{(?<json>[A-z0-9 -_]+?)}\'/', $contents, $jsontids);
+	$contents = str_replace('class=" j_thread_list','class="j_thread_list',$contents);
+	preg_match_all('/<li class="j_thread_list[A-z0-9 -_]+" data-field=\'{(?<json>.*?)}\'/', $contents, $jsontids);
 	foreach ($jsontids['json'] as $jsontid){
 		$jsontid=str_replace('&quot;','"', '{'.$jsontid.'}');
-		if($tids[]=json_decode($jsontid)->is_top == 0)
-		   $tids[]=json_decode($jsontid)->id;
+		$tids[]=json_decode($jsontid)->id;
+		$tops[]=json_decode($jsontid)->is_top;
+		$goods[]=json_decode($jsontid)->is_good;
 	}
-	$tid=$tids[rand(0,count($tids)-1)];
+	$rnum = rand(0,count($tids)-1);
+	$tid=$tids[$rnum];
+	$top=$tops[$rnum];
+	$good=$goods[$rnum];
+	if ($top == "true") return 'top';
+	elseif ($good == "true") return 'good';
 	return $tid;
 }
 
@@ -133,6 +140,8 @@ function client_rppost($uid, $tieba, $content) {
 	if (! $BDUSS) return array (- 1,'找不到 BDUSS Cookie' );
 	if (! $content) $content=get_random_content();
 	if (! $tieba['tid']) $tieba['tid']=get_random_tid($tieba ['name']);
+	if ($tieba['tid'] == 'top') return array (9,"随机到置顶贴，取消本次回帖。" );
+	elseif ($tieba['tid'] == 'good') return array (10,"随机到精品贴，取消本次回帖。" );
 	$formdata = array (
 			'BDUSS' => $BDUSS,
 			'_client_id' => 'wappc_136' . random ( 10, true ) . '_' . random ( 3, true ),

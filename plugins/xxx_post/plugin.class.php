@@ -4,12 +4,12 @@ class plugin_xxx_post extends Plugin{
 	var $description = '可以模仿客户端进行回帖（三倍经验yoooooooooooooo）';
 	var $modules = array (
 		array ('id' => 'index',	'type' => 'page','title' => '客户端回帖','file' => 'index.php'),
-		array('type' => 'cron', 'cron' => array('id' => 'xxx_post/c_daily', 'order' => '101')),
-		array('type' => 'cron', 'cron' => array('id' => 'xxx_post/c_first', 'order' => '103')),
-		array('type' => 'cron', 'cron' => array('id' => 'xxx_post/c_se', 'order' => '105')),
-		array('type' => 'cron', 'cron' => array('id' => 'xxx_post/c_sxbk', 'order' => '109')),
+		array('type' => 'cron', 'cron' => array('id' => 'xxx_post/c_daily', 'order' => '100')),
+		array('type' => 'cron', 'cron' => array('id' => 'xxx_post/c_first', 'order' => '101')),
+		array('type' => 'cron', 'cron' => array('id' => 'xxx_post/c_se', 'order' => '102')),
+		array('type' => 'cron', 'cron' => array('id' => 'xxx_post/c_sxbk', 'order' => '103')),
 	);
-	var $version='0.3.1';
+	var $version='0.3.5';
 	function checkCompatibility(){
 		if(version_compare(VERSION, '1.14.4.24', '<')) showmessage('签到助手版本过低，请升级');
 	}
@@ -26,7 +26,7 @@ class plugin_xxx_post extends Plugin{
 				`sid` int(10) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
 				`uid` int(10) unsigned NOT NULL,
 				`fid` int(10) unsigned NOT NULL,
-				`tid` int(12) unsigned NOT NULL,
+				`tid` bigint(12) unsigned NOT NULL,
 				`name` varchar(127) NOT NULL,
 				`unicode_name` varchar(512) NOT NULL,
 				`post_name` varchar(127) NOT NULL
@@ -77,11 +77,18 @@ class plugin_xxx_post extends Plugin{
 					UPDATE cron SET id='xxx_post/c_first' WHERE id='xxx_post';
 					UPDATE cron SET id='xxx_post/c_se' WHERE id='xxx_post_se';
 					UPDATE cron SET id='xxx_post/c_sxbk' WHERE id='xxx_post_sxbk';
+					alter table `xxx_post_posts` modify column `tid` bigint(12);
 					");
 				$this->saveSetting ( 'sxbk', '0' );
 				$this->saveSetting ( 'se', '21' );
 				$this->saveSetting ( 'first_end','15');
 				return '0.3.1';
+			case '0.3.1':
+			case '0.3.2':
+			case '0.3.3':
+			case '0.3.4':
+				runquery("alter table `xxx_post_posts` modify column `tid` bigint(12);");
+				return '0.3.5';
 			default:
 				throw new Exception("Unknown plugin version: {$from_version}");
 		}
@@ -210,7 +217,7 @@ EOF;
 				break;
 			case 'add-tieba' :
 				$tieba = $_POST ['xxx_post_add_tieba'];
-				$ch = curl_init ('http://tieba.baidu.com/f?kw='.urlencode(iconv("utf-8", "gbk", $tieba)).'&fr=index');
+				$ch = curl_init ('http://tieba.baidu.com/f?kw='.urlencode(iconv("utf-8", "utf-8", $tieba)).'&fr=index');
 				curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
 				$contents = curl_exec ( $ch );
 				curl_close ( $ch );
@@ -222,9 +229,11 @@ EOF;
 					$data ['msgx'] = 0;
 					break;
 				}
-				preg_match ( '/fname="(.+?)"/', $contents, $fnames );
-				$unicode_name = urlencode($fnames [1]);
-				$fname = $fnames [1];
+				preg_match ( '/"forum_name"\s?:\s?(?<fname>"\S+?")/', $contents, $fnames );
+				//$fname = iconv("utf-8", "utf-8", str_replace('"','',$fnames['fname']));
+				$fname = str_replace('"','',$fnames['fname']);
+				$fname = unicode2utf8($fname);
+				$unicode_name = urlencode($fname);
 				DB::insert ( 'xxx_post_posts', array (
 					'uid' => $uid,
 					'fid' => $fid,
@@ -251,11 +260,11 @@ EOF;
 					$data ['msgx'] = 0;
 					break;
 				}
-				preg_match ( '/fname="(.+?)"/', $contents, $fnames );
+                preg_match ( '/fname=\"(.+?)\"/', $contents, $fnames );
 				$unicode_name = urlencode($fnames [1]);
-				$fname = $fnames [1];
-				preg_match ( '/title:"(.*?)"/', $contents, $post_names );
-				$post_name = $post_names [1];
+				$fname = iconv("utf-8", "utf-8", $fnames [1]);
+                preg_match ( '/title:\s?"(.*?)\"/', $contents, $post_names );
+				$post_name = iconv("utf-8", "utf-8", $post_names [1]);
 				DB::insert ( 'xxx_post_posts', array (
 						'uid' => $uid,
 						'fid' => $fid,
@@ -300,4 +309,14 @@ EOF;
 		}
 		echo json_encode ( $data );
 	}
+}
+
+function unicode2utf8($str){
+        if(!$str) return $str;
+        $decode = json_decode($str);
+        if($decode) return $decode;
+        $str = '["' . $str . '"]';
+        $decode = json_decode($str);
+        if(count($decode) == 1){return $decode[0];}
+        return $str;
 }
