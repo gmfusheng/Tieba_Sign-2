@@ -188,6 +188,7 @@ function load_baidu_bind(){
 			$('.tab-binded div').append('<p>安全手机：' + result.data.mobilephone + '</p>');
 			$('.tab-binded div').append('<p>安全邮箱：' + result.data.email + '</p>');
 		} else if (result.no == 4) {
+            $('#content-baidu_bind .tab-bind').removeClass('hidden');
             createWindow().setTitle('错误').setContent('缺少 PTOKEN 无法获取账号信息，请通过 API 重新绑定！').addCloseButton('确定').append();
         } else {
 			$('#content-baidu_bind .tab-bind').removeClass('hidden');

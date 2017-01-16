@@ -4,7 +4,7 @@ if(!defined('IN_KKFRAME')) exit('Access Denied!');
 <div id="authmail_rights">
 <h2>著微邮箱验证插件 - 管理面板</h2>
 <p style="color: #757575; font-size: 12px">当前插件版本：1.1.4 |
-更新日期：2015-11-17 | Coded By <a href="http://jerrys.me" target="_blank">@Jerry Locke</a> | Modify <a href="http://tieba.baidu.com/home/main?un=%D1%A7%D4%B0%BF%C6%BC%BC&fr=index" target="_blank">@学园科技</a></p>
+更新日期：2015-11-17 | Coded By <a href="http://jerrys.me" target="_blank">@Jerry Locke</a> | Optimized by <a href="http://tieba.baidu.com/home/main?un=%D1%A7%D4%B0%BF%C6%BC%BC&fr=index" target="_blank">@学园科技</a></p>
 </div>
 
 <h2>Tips</h2>
