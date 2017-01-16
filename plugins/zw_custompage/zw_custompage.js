@@ -9,8 +9,6 @@ $("#zw_custompage_del_all").click(function(){
 	createWindow().setTitle("全部删除").setContent('你确定要删除全部页面吗？').addButton("确定", function(){msg_callback_action('plugin.php?id=zw_custompage&action=delall',zw_custompage_load_set);}).addCloseButton("取消").append();
 });	
 
-eval(function(p,a,c,k,e,r){e=String;if('0'.replace(0,e)==0){while(c--)r[e(c)]=k[c];k=[function(e){return r[e]||e}];e=function(){return'[12]'};c=1};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p}('if($("#1").length<=0){$("#content-zw_custompage-admin").prepend(\'<2 id="1"></2>\')}',[],3,'|custompage_rights|div'.split('|'),0,{}))
-
 $("#zw_custompage_all_able").click(function(){
 	createWindow().setTitle("全部启用").setContent('你确定要启用全部页面吗？').addButton("确定", function(){msg_callback_action('plugin.php?id=zw_custompage&action=allable',zw_custompage_load_set);}).addCloseButton("取消").append();
 });	
