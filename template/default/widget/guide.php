@@ -19,7 +19,7 @@ if(!defined('IN_KKFRAME')) exit();
 <p>温馨提示：只能使用百度账号绑定邮箱登陆！</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;一个用户只能绑定一个百度帐号！绑定新的百度帐号将掩盖原来的帐号信息！</p><br>
 <style>
-.bind_mode .extension_info { padding: 10px 15px; margin: 0 5px 10px 20px; background: #f5f5f555; border: 1px solid #ddd; }
+.bind_mode .extension_info { padding: 10px 15px; margin: 0 5px 10px 20px; background: #f5f5f5; border: 1px solid #ddd; }
 </style>
 <div class="bind_mode">
 <p><label><input type="radio" name="bind_mode" value="auto" checked> 通过 API 一键获取 Cookie 绑定</label></p>
