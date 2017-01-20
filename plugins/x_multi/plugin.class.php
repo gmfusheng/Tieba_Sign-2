@@ -10,13 +10,13 @@ class plugin_x_multi extends Plugin{
                     'file' => 'index.inc.php' 
             ) 
     );
-    var $version = '0.2.2';
+    var $version = '0.2.3';
     public static function page_footer_js() {
         echo '<script src="plugins/x_multi/main.js"></script>';
     }
     public static function on_install() {
         DB::query ( "CREATE TABLE IF NOT EXISTS x_multi(xmid int(10) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,xuid int(10) unsigned NOT NULL,uid int(10) unsigned NOT NULL,name varchar(32) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8" );
-        saveSetting ('x_multi','0.2.2-2016-01-19');
+        saveSetting ('x_multi','0.2.3-2016-01-19');
         showmessage ("安装成功！");
     }
     public static function on_uninstall() {
@@ -46,6 +46,9 @@ class plugin_x_multi extends Plugin{
             case '0.2.1':
                 saveSetting ('x_multi','0.2.2-2016-01-19');
                 return '0.2.2';
+            case '0.2.2':
+                saveSetting ('x_multi','0.2.3-2016-01-20');
+                return '0.2.3';
         }
     }
 }

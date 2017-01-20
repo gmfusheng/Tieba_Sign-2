@@ -124,7 +124,7 @@ switch ($_GET['v']) {
         $bname = textMiddle($res,'class="user-name">','</div>');
         if (empty($bname)) showmessage('获取百度昵称失败，请重试',stristr($siteurl,'plugins',true) . '#x_multi-index',5);
 
-        $countx = DB::result_first("select count(*) from `x_multi` where `name` = {$bname}");
+        $countx = DB::result_first("select count(*) from `x_multi` where `name` = '{$bname}'");
         if($countx > 0){
             showmessage('该ID已被绑定！',stristr($siteurl,'plugins',true) . '#x_multi-index',5);
         }
