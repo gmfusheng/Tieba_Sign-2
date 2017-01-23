@@ -180,7 +180,7 @@ function load_baidu_bind(){
 			$('#content-baidu_bind .tab-binded').removeClass('hidden');
 			$('.tab-binded div').removeClass('hidden');
 			$('.tab-binded div').html('');
-			var avatar_img = 'https://ss0.bdstatic.com/7Ls0a8Sm1A5BphGlnYG/sys/portrait/item/' + result.data.user_portrait;
+			var avatar_img = '//gss0.bdstatic.com/6LZ1dD3d1sgCo2Kml5_Y_D3/sys/portrait/item/' + result.data.user_portrait;
 			$('#avatar_img').attr('src', avatar_img);
 			$('#avatar_img').removeClass('hidden');
 			$('.tab-binded div').append('<img src="' + avatar_img + '" class="float-left">');
