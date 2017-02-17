@@ -1,4 +1,4 @@
 # 说明
-账号信息显示、刷新贴吧列表功能必须是从 [学园 API](http://api.kk.hydd.cc) 绑定的才支持。
+账号信息显示、刷新贴吧列表功能要求 Cookies 必须有 ptoken, 建议从 [http://api.kk.hydd.cc](http://api.kk.hydd.cc) 绑定。
 
-这是应为本地绑定和其它 API 平台没有提供必要的Token，所以无法使用上述功能。
+PHP 版本必须大于 **5.3**，支持 **PHP7**
