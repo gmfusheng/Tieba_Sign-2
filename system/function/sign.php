@@ -1,41 +1,6 @@
 <?php
 if(!defined('IN_KKFRAME')) exit();
 
-function readCookies($str) {
-	preg_match("/set\-cookie:([^\r\n]*)/i", $str, $m1);
-		if (!empty($m1)) {
-			preg_match_all("/(.*?)=(.*?);/", $m1[1], $m2, PREG_SET_ORDER);
-			$r = array();
-			foreach ($m2 as $value) {
-				$r1 = trim($value[1]);
-				if ($r1 != 'expires' && $r1 != 'max-age' && $r1 != 'path' && $r1 != 'domain') {
-				$r = $r1 . '=' . trim($value[2]) . '; ';
-			}
-		}
-		return $r;
-	}
-}
-
-function _get_redirect_data($url,$cookie) {
-	$ch = curl_init($url);
-	curl_setopt($ch, CURLOPT_HEADER, true);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_COOKIE, $cookie);
-	$data = curl_exec($ch);
-	$info = curl_getinfo($ch);
-	curl_close($ch);
-	if ($info['http_code'] == 200) {
-		$body = substr($data, $info['header_size']);
-		return $body;
-	} elseif ($info['http_code'] == 302) {
-		$header = substr($data, 0, $info['header_size']);
-		$cookie .= readCookies($header);
-		$url =  $info['redirect_url'];
-		return _get_redirect_data($url,$cookie);
-	}
-}
-
 function _get_tbs($uid){
 	static $tbs = array();
 	if($tbs[$uid]) return $tbs[$uid];
@@ -64,10 +29,14 @@ function _verify_cookie($cookie){
 
 function _get_baidu_userinfo($uid){
 	$cookie = get_cookie($uid);
-	if (stripos($cookie,'PTOKEN') === FALSE) return array('no' => 4);
-	$data = _get_redirect_data('http://tieba.baidu.com/f/user/json_userinfo',$cookie);
-	$json = mb_convert_encoding($data, "utf8", "gbk");
-	return json_decode($json, true);
+	if (!empty($cookie)) {
+		if (stripos($cookie,'PTOKEN') === FALSE) return array('no' => 4);
+		$data = _get_redirect_data('http://tieba.baidu.com/f/user/json_userinfo',$cookie);
+		$json = mb_convert_encoding($data, "utf8", "gbk");
+		return json_decode($json, true);
+	} else {
+		return array('no' => -1);
+	}
 }
 
 function _get_liked_tieba($cookie){
