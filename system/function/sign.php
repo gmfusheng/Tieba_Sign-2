@@ -247,23 +247,59 @@ function _client_sign_old($uid, $tieba){
 }
 
 function _zhidao_sign($uid){
-	$ch = curl_init('http://zhidao.baidu.com/submit/user');
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+	$cookie = get_cookie($uid);
+	$ua = 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36';
+	$header = array(
+		'User-Agent: ' . $ua,
+		'Referer: https://zhidao.baidu.com/'
+	);
+	$ch = curl_init('https://zhidao.baidu.com/api/loginInfo?t=' . TIMESTAMP . '000');
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_COOKIE, get_cookie($uid));
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, 'cm=100509&t='.TIMESTAMP);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_COOKIE, $cookie);
 	$result = curl_exec($ch);
 	curl_close($ch);
-	return @json_decode($result);
+	$json = json_decode($result, true);
+	$stoken = !empty($json['stoken']) ? $json['stoken'] : '';
+
+	if ($stoken != '') {
+		$header = array(
+			'User-Agent: ' . $ua,
+			'X-ik-token: ' . $stoken,
+			'X-ik-ssl: 1',
+			'Referer: https://zhidao.baidu.com/'
+		);
+		$ch = curl_init('https://zhidao.baidu.com/submit/user');
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+		curl_setopt($ch, CURLOPT_POST, true);
+		$post_data = array(
+			'cm' => 100509,
+			'stoken' => $stoken
+		);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+		$result = curl_exec($ch);
+		curl_close($ch);
+		$json = json_decode($result, true);
+	}
+
+	return $json;
 }
 
 function _wenku_sign($uid){
-	$ch = curl_init('http://wenku.baidu.com/task/submit/signin');
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array('User-Agent: Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.43 BIDUBrowser/2.x Safari/537.31'));
+	$header = array(
+		'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36',
+		'Referer: https://wenku.baidu.com/task/browse/daily'
+	);
+	$ch = curl_init('https://wenku.baidu.com/task/submit/signin');
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 	curl_setopt($ch, CURLOPT_COOKIE, get_cookie($uid));
 	$result = curl_exec($ch);
 	curl_close($ch);
-	return @json_decode($result);
+	return json_decode($result);
 }
